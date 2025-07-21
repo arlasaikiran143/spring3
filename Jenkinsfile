@@ -9,14 +9,12 @@ pipeline {
     environment {
         SONARQUBE_ENV = 'MySonarQube'
         NEXUS_CREDENTIAL_ID = 'nexus-new'
-        NEXUS_URL = '35.153.175.117:8081'
-        NEXUS_REPOSITORY = 'ncodeit-hello-world'
-        DOCKER_IMAGE = 'manikiran7/ncodeit-hello-world'
-        DOCKERHUB_CREDENTIALS = 'dockerhub-creds'
-        TOMCAT_URL = 'http://13.219.99.189:8081/manager/text'
-        TOMCAT_CREDENTIALS = 'tomcat-manager-credentials'
-        SLACK_CHANNEL = '#team'
-        SLACK_CREDENTIALS = 'slack-token'
+        NEXUS_URL = 'http://54.165.182.236:8081'
+        NEXUS_REPOSITORY = 'sample'
+        DOCKER_IMAGE = 'manikiran7/firstrepo'
+        DOCKERHUB_CREDENTIALS = 'docker-creds'
+        TOMCAT_URL = 'http://54.165.182.236:8083/manager/text'
+        TOMCAT_CREDENTIALS = 'tomcat-creds'
         NVM_DIR = "$HOME/.nvm"
         PATH = "${NVM_DIR}/versions/node/v16.20.2/bin:${PATH}"
         SKIP_SONAR = 'true'       // Change to 'false' to enable
@@ -134,28 +132,11 @@ pipeline {
                         sh '''
                             curl -v -T target/ncodeit-hello-world-3.0.war \
                             -u $TOMCAT_USER:$TOMCAT_PASS \
-                            "http://13.219.99.189:8081/manager/text/deploy?path=/maniapp&update=true"
+                            "http://54.165.182.236:8083/manager/text/deploy?path=/maniapp&update=true"
                         '''
                     }
                 }
             }
-        }
-    }
-
-    post {
-        success {
-            slackSend(
-                channel: "${env.SLACK_CHANNEL}",
-                color: "good",
-                message: "✅ Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' succeeded: ${env.BUILD_URL}"
-            )
-        }
-        failure {
-            slackSend(
-                channel: "${env.SLACK_CHANNEL}",
-                color: "danger",
-                message: "❌ Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' failed: ${env.BUILD_URL}"
-            )
         }
     }
 }
