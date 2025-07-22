@@ -8,17 +8,13 @@ pipeline {
 
     environment {
         SONARQUBE_ENV = 'MySonarQube'
-        NEXUS_CREDENTIAL_ID = 'nexus-new'
-        NEXUS_URL = 'http://54.165.182.236:8081'
+        NEXUS_CREDENTIAL_ID = 'nexus-keygen'
+        NEXUS_URL = 'http://54.90.70.220:8081'
         NEXUS_REPOSITORY = 'sample'
-        DOCKER_IMAGE = 'manikiran7/firstrepo'
+        DOCKER_IMAGE = 'arlasaikiran1/sample'
         DOCKERHUB_CREDENTIALS = 'docker-creds'
         TOMCAT_URL = 'http://54.165.182.236:8083/manager/text'
         TOMCAT_CREDENTIALS = 'tomcat-creds'
-        NVM_DIR = "$HOME/.nvm"
-        PATH = "${NVM_DIR}/versions/node/v16.20.2/bin:${PATH}"
-        SKIP_SONAR = 'true'       // Change to 'false' to enable
-        SKIP_TESTS = 'true'       // Change to 'false' to run tests
     }
 
     stages {
@@ -32,9 +28,6 @@ pipeline {
         }
 
         stage('Code Quality - SonarQube') {
-            when {
-                expression { return env.SKIP_SONAR != 'true' }
-            }
             steps {
                 wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                     withSonarQubeEnv("${SONARQUBE_ENV}") {
