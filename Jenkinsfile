@@ -38,7 +38,7 @@ pipeline {
             steps {
                 wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                     withSonarQubeEnv("${SONARQUBE_ENV}") {
-                        sh "mvn clean verify sonar:sonar"
+                        sh 'mvn clean verify sonar:sonar'
                     }
                 }
             }
@@ -47,15 +47,13 @@ pipeline {
         stage('Maven Build') {
             steps {
                 wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                    withEnv(["JAVA_HOME=${tool 'Java17'}", "PATH+JAVA=${tool 'Java17'}/bin"]) {
-                        sh '''
-                            if [ "$SKIP_TESTS" = "true" ]; then
-                                mvn clean install -DskipTests
-                            else
-                                mvn clean install
-                            fi
-                        '''
-                    }
+                    sh '''
+                        if [ "$SKIP_TESTS" = "true" ]; then
+                            mvn clean install -DskipTests
+                        else
+                            mvn clean install
+                        fi
+                    '''
                 }
             }
         }
@@ -99,9 +97,9 @@ pipeline {
                         }
 
                         sh """
-                        docker ps -a --filter "ancestor=${DOCKER_IMAGE}" --format "{{.ID}}" | xargs -r docker stop || true
-                        docker ps -a --filter "ancestor=${DOCKER_IMAGE}" --format "{{.ID}}" | xargs -r docker rm || true
-                        docker images ${DOCKER_IMAGE} --format "{{.Repository}}:{{.Tag}}" | grep -v ":${BUILD_NUMBER}" | xargs -r docker rmi || true
+                            docker ps -a --filter "ancestor=${DOCKER_IMAGE}" --format "{{.ID}}" | xargs -r docker stop || true
+                            docker ps -a --filter "ancestor=${DOCKER_IMAGE}" --format "{{.ID}}" | xargs -r docker rm || true
+                            docker images ${DOCKER_IMAGE} --format "{{.Repository}}:{{.Tag}}" | grep -v ":${BUILD_NUMBER}" | xargs -r docker rmi || true
                         """
 
                         sh "docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} ."
@@ -116,10 +114,10 @@ pipeline {
                 wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                     withCredentials([usernamePassword(credentialsId: DOCKERHUB_CREDENTIALS, usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                         sh """
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}
-                        docker push ${DOCKER_IMAGE}:latest
-                        docker logout
+                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                            docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}
+                            docker push ${DOCKER_IMAGE}:latest
+                            docker logout
                         """
                     }
                 }
@@ -133,7 +131,7 @@ pipeline {
                         sh '''
                             curl -v -T target/ncodeit-hello-world-3.0.war \
                             -u $TOMCAT_USER:$TOMCAT_PASS \
-                            "http://54.165.182.236:8083/manager/text/deploy?path=/maniapp&update=true"
+                            "${TOMCAT_URL}?path=/maniapp&update=true"
                         '''
                     }
                 }
