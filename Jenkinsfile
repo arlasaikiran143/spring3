@@ -3,7 +3,7 @@ pipeline {
 
     tools {
         maven "Maven3"
-        jdk "Java17"   // Use Java11 if your app supports it
+        jdk "Java17"
     }
 
     environment {
@@ -27,6 +27,13 @@ pipeline {
             }
         }
 
+        stage('Verify JDK') {
+            steps {
+                sh 'echo "JAVA_HOME: $JAVA_HOME"'
+                sh '$JAVA_HOME/bin/java -version'
+            }
+        }
+
         stage('Code Quality - SonarQube') {
             steps {
                 wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
@@ -40,13 +47,15 @@ pipeline {
         stage('Maven Build') {
             steps {
                 wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                    sh '''
-                        if [ "$SKIP_TESTS" = "true" ]; then
-                            mvn clean install -DskipTests
-                        else
-                            mvn clean install
-                        fi
-                    '''
+                    withEnv(["JAVA_HOME=${tool 'Java17'}", "PATH+JAVA=${tool 'Java17'}/bin"]) {
+                        sh '''
+                            if [ "$SKIP_TESTS" = "true" ]; then
+                                mvn clean install -DskipTests
+                            else
+                                mvn clean install
+                            fi
+                        '''
+                    }
                 }
             }
         }
@@ -89,7 +98,6 @@ pipeline {
                             error("WAR file not found! Ensure Maven build was successful.")
                         }
 
-                        // Cleanup old containers and images
                         sh """
                         docker ps -a --filter "ancestor=${DOCKER_IMAGE}" --format "{{.ID}}" | xargs -r docker stop || true
                         docker ps -a --filter "ancestor=${DOCKER_IMAGE}" --format "{{.ID}}" | xargs -r docker rm || true
