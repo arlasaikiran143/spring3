@@ -29,8 +29,13 @@ pipeline {
 
         stage('Verify JDK') {
             steps {
-                sh 'echo "JAVA_HOME: $JAVA_HOME"'
-                sh '$JAVA_HOME/bin/java -version'
+                sh '''
+                    export JAVA_HOME=$JAVA_HOME
+                    export PATH=$JAVA_HOME/bin:$PATH
+                    echo "JAVA_HOME is: $JAVA_HOME"
+                    java -version
+                    mvn -version
+                '''
             }
         }
 
@@ -38,7 +43,11 @@ pipeline {
             steps {
                 wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                     withSonarQubeEnv("${SONARQUBE_ENV}") {
-                        sh 'mvn clean verify sonar:sonar'
+                        sh '''
+                            export JAVA_HOME=$JAVA_HOME
+                            export PATH=$JAVA_HOME/bin:$PATH
+                            mvn clean verify sonar:sonar
+                        '''
                     }
                 }
             }
@@ -48,6 +57,8 @@ pipeline {
             steps {
                 wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                     sh '''
+                        export JAVA_HOME=$JAVA_HOME
+                        export PATH=$JAVA_HOME/bin:$PATH
                         if [ "$SKIP_TESTS" = "true" ]; then
                             mvn clean install -DskipTests
                         else
@@ -100,10 +111,9 @@ pipeline {
                             docker ps -a --filter "ancestor=${DOCKER_IMAGE}" --format "{{.ID}}" | xargs -r docker stop || true
                             docker ps -a --filter "ancestor=${DOCKER_IMAGE}" --format "{{.ID}}" | xargs -r docker rm || true
                             docker images ${DOCKER_IMAGE} --format "{{.Repository}}:{{.Tag}}" | grep -v ":${BUILD_NUMBER}" | xargs -r docker rmi || true
+                            docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} .
+                            docker tag ${DOCKER_IMAGE}:${BUILD_NUMBER} ${DOCKER_IMAGE}:latest
                         """
-
-                        sh "docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} ."
-                        sh "docker tag ${DOCKER_IMAGE}:${BUILD_NUMBER} ${DOCKER_IMAGE}:latest"
                     }
                 }
             }
