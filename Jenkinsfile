@@ -13,7 +13,7 @@ pipeline {
         NEXUS_REPOSITORY = 'sample'
         DOCKER_IMAGE = 'arlasaikiran1/sample'
         DOCKERHUB_CREDENTIALS = 'docker-creds'
-        TOMCAT_URL = 'http://54.165.182.236:8083/manager/text'
+        TOMCAT_URL = 'http://3.90.64.42:8083/manager/text'
         TOMCAT_CREDENTIALS = 'tomcat-creds'
     }
 
