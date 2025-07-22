@@ -9,7 +9,7 @@ pipeline {
     environment {
         SONARQUBE_ENV = 'MySonarQube'
         NEXUS_CREDENTIAL_ID = 'nexus_keygen'
-        NEXUS_URL = 'http://54.90.70.220:8081'
+        NEXUS_URL = '54.90.70.220:8081'
         NEXUS_REPOSITORY = 'sample'
         DOCKER_IMAGE = 'arlasaikiran1/sample'
         DOCKERHUB_CREDENTIALS = 'docker-creds'
