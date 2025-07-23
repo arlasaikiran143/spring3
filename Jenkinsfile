@@ -53,21 +53,21 @@ pipeline {
             }
         }
 
-        stage('Maven Build') {
-            steps {
-                wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                    sh '''
-                        export JAVA_HOME=$JAVA_HOME
-                        export PATH=$JAVA_HOME/bin:$PATH
-                        if [ "$SKIP_TESTS" = "true" ]; then
-                            mvn clean install -DskipTests
-                        else
-                            mvn clean install
-                        fi
-                    '''
-                }
+     stage('Maven Build') {
+    steps {
+        wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+            script {
+                def skipFlag = (env.SKIP_TESTS == 'true') ? '-DskipTests' : ''
+                sh """
+                    echo "Using JAVA_HOME: $JAVA_HOME"
+                    export PATH=\$JAVA_HOME/bin:\$PATH
+                    mvn clean install $skipFlag
+                """
             }
         }
+    }
+}
+
 
         stage('Upload to Nexus') {
             steps {
