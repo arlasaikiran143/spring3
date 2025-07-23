@@ -1,4 +1,4 @@
-# Stage 1: Build WAR using Maven + Java 21
+# Stage 1: Build WAR
 FROM maven:3.9.6-eclipse-temurin-21 AS build
 
 WORKDIR /app
@@ -6,16 +6,16 @@ WORKDIR /app
 COPY pom.xml .
 COPY src ./src
 
-# ✅ This line is CRITICAL
+# ✅ Explicitly run the build
 RUN mvn clean package
 
-# Stage 2: Run WAR with Tomcat
+# Stage 2: Run with Tomcat
 FROM tomcat:10.1-jdk21-temurin
 
-# Clean default webapps
+# Clean default apps
 RUN rm -rf /usr/local/tomcat/webapps/*
 
-# Copy WAR to Tomcat
+# Copy WAR from build stage
 COPY --from=build /app/target/*.war /usr/local/tomcat/webapps/ROOT.war
 
 EXPOSE 8080
